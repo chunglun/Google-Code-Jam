@@ -1,0 +1,103 @@
+package com.lu;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.Arrays;
+import java.util.List;
+
+public class R0C2013
+{
+	private String inputFileName = "2013_C_small.in";
+	private String outputFileName = "2013_C_small.out";
+	
+	public static void main(String[] args)
+	{
+		R0C2013 g = new R0C2013();
+		g.start();
+	}
+	
+	private void start()
+	{
+		FileInputStream fin;
+		FileOutputStream fout;
+		
+		try
+		{
+			fin = new FileInputStream(inputFileName);
+			InputStreamReader inputReader = new InputStreamReader(fin);
+			BufferedReader br = new BufferedReader(inputReader);
+			
+			fout = new FileOutputStream(outputFileName);
+			OutputStreamWriter outputWriter = new OutputStreamWriter(fout);
+			BufferedWriter bw = new BufferedWriter(outputWriter);
+			
+			int round = Integer.parseInt(br.readLine());
+			
+			for(int i = 0; i < round; i++)
+			{
+				String line = br.readLine();
+				List<String> lineList = Arrays.asList(line.split(" "));		
+				int number1 = Integer.parseInt(lineList.get(0));
+				int number2 = Integer.parseInt(lineList.get(1));
+				int result = execute(number1, number2);		
+				bw.write("Case #" + (i+1) + ": " + result);
+				bw.newLine();
+			}
+			
+			br.close();
+			bw.flush();
+			bw.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	// Need to improve the algorithm here
+	private int execute(int n1, int n2)
+	{
+		int count = 0;
+		for(int i = n1; i <= n2; i++)
+		{
+			if(isPerfectSquare(i)&&isPalindrome(i)&&isPalindrome((int) Math.sqrt(i)))
+			{
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	private boolean isPerfectSquare(int number)
+	{
+		int root = (int) Math.sqrt(number);
+		if(number == (root * root))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	private boolean isPalindrome(int number)
+	{
+		String numberStr = number + "";		
+		int strLength = numberStr.length();	
+		List<String> numberStrList = Arrays.asList(numberStr.split("(?!^)"));
+		
+		for(int i = 0; i < (strLength/2); i++)
+		{
+			if(!numberStrList.get(i).equals(numberStrList.get(strLength - i - 1)))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+}
