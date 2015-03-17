@@ -1,3 +1,4 @@
+// This version is for small integer
 package com.lu;
 
 import java.io.BufferedReader;
