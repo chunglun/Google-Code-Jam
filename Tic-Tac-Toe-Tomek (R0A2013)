@@ -1,0 +1,231 @@
+package com.lu;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class R0A2013
+{
+	private static final int WIDTH = 4;
+	private String inputFileName = "2013_A_small.in";
+	private String outputFileName = "2013_A_small.out";
+	
+	public static void main(String[] args)
+	{
+		R0A2013 g = new R0A2013();
+		g.start();
+	}
+	
+	private void start()
+	{
+		FileInputStream fin;
+		FileOutputStream fout;
+		
+		try
+		{
+			fin = new FileInputStream(inputFileName);
+			InputStreamReader inputReader = new InputStreamReader(fin);
+			BufferedReader br = new BufferedReader(inputReader);
+			
+			fout = new FileOutputStream(outputFileName);
+			OutputStreamWriter outputWriter = new OutputStreamWriter(fout);
+			BufferedWriter bw = new BufferedWriter(outputWriter);
+			
+			int round = Integer.parseInt(br.readLine());
+			
+			for(int i = 0; i < round; i++)
+			{
+				Map<Integer, List<String>> row = new HashMap<Integer, List<String>>();
+				for(int j = 0; j < WIDTH; j++)
+				{
+					String aLine = br.readLine();
+					char[] aLineChar = aLine.toCharArray();							
+					List<String> aLineStr = new ArrayList<String>();
+					for(int k = 0; k < aLineChar.length; k++)
+					{
+						aLineStr.add(String.valueOf(aLineChar[k]));
+					}
+					row.put(j, aLineStr);
+				}
+				String result = execute(row);				
+				br.readLine();			
+				bw.write("Case #" + (i+1) + ": " + result);
+				bw.newLine();
+			}
+			
+			br.close();
+			bw.flush();
+			bw.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	private String execute(Map<Integer, List<String>> rows)
+	{
+		Map<Integer, List<String>> columns = getColumns(rows);	
+		Map<Integer, List<String>> diagonals = getDiagonals(rows);
+
+		List<List<String>> allData = combine(rows, columns, diagonals);
+				
+		String result = "";
+		for(int i = 0; i < allData.size(); i++)
+		{
+			result = successRules(allData.get(i));
+			if(result != null)
+			{
+				return result;
+			}
+		}
+		
+		for(List<String> list : allData)
+		{
+			for(String str : list)
+			{
+				if(str.equals("."))
+				{
+					return "Game has not completed";
+				}
+			}
+		}
+
+		return "Draw";
+	}
+	
+	private Map<Integer, List<String>> getDiagonals(Map<Integer, List<String>> rows)
+	{
+		Map<Integer, List<String>> diagonals = new HashMap<Integer, List<String>>();
+		List<String> aDiagonal1 = new ArrayList<String>();
+		for(int i = 0; i < WIDTH; i++)
+		{
+			aDiagonal1.add(rows.get(i).get(i));
+		}
+		diagonals.put(0, aDiagonal1);
+		
+		List<String> aDiagonal2 = new ArrayList<String>();
+		for(int i = 0; i < WIDTH; i++)
+		{
+			aDiagonal2.add(rows.get(WIDTH - i - 1).get(i));
+		}
+		diagonals.put(1, aDiagonal2);
+		
+		return diagonals;
+	}
+	
+	private Map<Integer, List<String>> getColumns(Map<Integer, List<String>> rows)
+	{
+		Map<Integer, List<String>> columns = new HashMap<Integer, List<String>>();
+		for(int j = 0; j < WIDTH; j++)
+		{
+			List<String> aCol = new ArrayList<String>();			
+			for(int i = 0; i < WIDTH; i++)
+			{
+				aCol.add(rows.get(i).get(j));
+			}
+			columns.put(j, aCol);
+		}
+		return columns;
+	}
+	
+	private List<List<String>> combine(Map<Integer, List<String>> row, Map<Integer, List<String>> column, Map<Integer, List<String>> diagonal)
+	{
+		List<List<String>> results = new ArrayList<List<String>>();
+		results.addAll(row.values());
+		results.addAll(column.values());
+		results.addAll(diagonal.values());
+		return results;
+	}
+	
+	private boolean allElementAreTheSame(List<String> data)
+	{
+		String pre = null;
+		for(String str : data)
+		{
+			if(pre == null)
+			{
+				pre = str;
+				continue;
+			}
+			if(!pre.equals(str))
+			{
+				return false;
+			}
+		}		
+		if(data.get(0).equals("."))
+		{
+			return false;
+		}	
+		return true;
+	}
+	
+	private boolean allElementAreTheSameButContainOneT(List<String> data)
+	{
+		int index = -1;
+		for(int i = 0; i < data.size(); i++)
+		{
+			if(data.get(i).equals("T"))
+			{
+				index = i;
+				break;
+			}
+		}
+		if(index != -1)
+		{
+			List<String> newData = new ArrayList<String>();
+			for(int i = 0; i < data.size(); i++)
+			{
+				if(i == index)
+				{
+					continue;
+				}
+				newData.add(data.get(i));
+			}
+			return allElementAreTheSame(newData);
+		}
+		return false;
+	}
+	
+	private String getTheWinner(String element)
+	{
+		if(element.equals("O"))
+		{
+			return "O won";
+		}
+		else if(element.equals("X"))
+		{
+			return "X won";
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
+	private String successRules(List<String> data)
+	{
+		if(allElementAreTheSame(data))
+		{
+			return getTheWinner(data.get(0));
+		}
+		
+		if(allElementAreTheSameButContainOneT(data))
+		{
+			int index = 0;
+			if(data.get(index).equals("T"))
+			{
+				index = 1;
+			}
+			return getTheWinner(data.get(index));
+		}	
+		return null;
+	}
+}
